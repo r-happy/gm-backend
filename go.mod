@@ -1,6 +1,6 @@
 module back
 
-go 1.22.2
+go 1.23
 
 require (
 	github.com/badoux/checkmail v1.2.4
