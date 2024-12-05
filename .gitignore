@@ -1,4 +1,4 @@
 back
 .env
 
-sample.db
+*.db
