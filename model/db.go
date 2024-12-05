@@ -1,15 +1,16 @@
 package model
 
 import (
-	"github.com/jinzhu/gorm"
-	_ "github.com/jinzhu/gorm/dialects/sqlite"
+	"gorm.io/driver/sqlite"
+	"gorm.io/gorm"
 )
 
 var db *gorm.DB
 
 func init() {
 	var err error
-	db, err = gorm.Open("sqlite3", "db/sample.db")
+	db, err := gorm.Open(sqlite.Open("test.db"), &gorm.Config{})
+	// db, err = gorm.Open("sqlite3", "db/sample.db")
 	if err != nil {
 		panic("failed to connect database")
 	}
