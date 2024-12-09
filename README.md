@@ -18,3 +18,6 @@ make run
 make docker-build
 make docker-up
 ```
+
+## 備考
+srcの下に`.env`ファイルを作成し`JWT_KEY`を設定する必要があります。
