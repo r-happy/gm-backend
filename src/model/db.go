@@ -9,7 +9,7 @@ var db *gorm.DB // Package-level variable for database connection
 
 func init() {
 	var err error
-	db, err = gorm.Open(sqlite.Open("db/test.db"), &gorm.Config{}) // Correctly assigning to the package-level db
+	db, err = gorm.Open(sqlite.Open("db/test.db"), &gorm.Config{})
 	if err != nil {
 		panic("failed to connect database")
 	}

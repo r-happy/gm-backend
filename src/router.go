@@ -12,6 +12,7 @@ func newRouter() *echo.Echo {
 
 	e.Use(middleware.Logger())
 	e.Use(middleware.Recover())
+	e.Use(middleware.CORS())
 	e.POST("/user", handler.CreateUser)
 	e.POST("/login", handler.Login)
 
