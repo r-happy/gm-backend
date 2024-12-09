@@ -1,12 +1,7 @@
-build:
-	go build .
+# docker
 
-start:
-	./back
+docker-build:
+	docker compose build
 
-i:
-	go mod tidy
-
-run:
-	go build .
-	./back
+docker-up:
+	docker compose up
