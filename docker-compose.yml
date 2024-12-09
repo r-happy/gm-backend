@@ -3,6 +3,7 @@ services:
     build:
       context: .
       dockerfile: Dockerfile
+    working_dir: /app
     volumes:
       - ./src:/app
     ports:

@@ -1,7 +1,11 @@
 FROM golang:latest
 
-COPY ./src /app
-
 WORKDIR /app
 
+COPY ./src /app
+
 RUN go mod tidy
+
+EXPOSE 1323
+
+CMD ["go", "run", "."]

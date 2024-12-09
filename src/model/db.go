@@ -5,18 +5,18 @@ import (
 	"gorm.io/gorm"
 )
 
-var db *gorm.DB
+var db *gorm.DB // Package-level variable for database connection
 
 func init() {
-	// var err error
-	db, err := gorm.Open(sqlite.Open("db/test.db"), &gorm.Config{})
-	// db, err = gorm.Open("sqlite3", "db/sample.db")
+	var err error
+	db, err = gorm.Open(sqlite.Open("db/test.db"), &gorm.Config{}) // Correctly assigning to the package-level db
 	if err != nil {
 		panic("failed to connect database")
 	}
-	db.AutoMigrate(&User{})
-	db.AutoMigrate(&Space{})
-	db.AutoMigrate(&Member{})
-	db.AutoMigrate(&Good{})
-	db.AutoMigrate(&ResponsibleUid{})
+
+	// AutoMigrate database models
+	err = db.AutoMigrate(&User{}, &Space{}, &Member{}, &Good{}, &ResponsibleUid{})
+	if err != nil {
+		panic("failed to migrate database")
+	}
 }
