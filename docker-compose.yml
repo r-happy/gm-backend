@@ -8,4 +8,4 @@ services:
       - ./src:/app
     ports:
       - "1323:1323"
-    command: go run .
+    command: sh -c "go build -o back && ./back"

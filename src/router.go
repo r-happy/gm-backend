@@ -15,6 +15,9 @@ func newRouter() *echo.Echo {
 	e.Use(middleware.CORS())
 	e.POST("/user", handler.CreateUser)
 	e.POST("/login", handler.Login)
+	e.GET("/", func (c echo.Context) error {
+		return c.String(200, "Hello, World!!")
+	})
 
 	api := e.Group("/api")
 	api.Use(middleware.JWTWithConfig(handler.Config))
@@ -26,6 +29,7 @@ func newRouter() *echo.Echo {
 	// api.GET("/space/:id/good", handler.GetGoods)
 	// api.GET("/space/:sid/good/:gid", handler.GetGood)
 	// api.POST("/space/:id/good", handler.AddGoods)
+	// api.GET("/profile", handler.GetProfile)
 
 	return e
 }
