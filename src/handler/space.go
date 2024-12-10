@@ -26,6 +26,7 @@ func AddSpace(c echo.Context) error {
 	if user := model.FindUser(&model.User{Email: email}); user.ID == 0 {
 		return echo.ErrNotFound
 	}
+	
 
 	space.ID, _ = generateUniqueID()
 	space.TimeOfBorn = time.Now()

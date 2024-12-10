@@ -29,7 +29,7 @@ func newRouter() *echo.Echo {
 	// api.GET("/space/:id/good", handler.GetGoods)
 	// api.GET("/space/:sid/good/:gid", handler.GetGood)
 	// api.POST("/space/:id/good", handler.AddGoods)
-	// api.GET("/profile", handler.GetProfile)
+	api.GET("/profile", handler.GetProfile)
 
 	return e
 }
