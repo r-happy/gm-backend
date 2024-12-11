@@ -4,7 +4,7 @@ import "time"
 
 type Good struct {
 	GoodID        string    `json:"good_id"`
-	AddUid        string    `json:"add_uid"`
+	AddEmail        string    `json:"add_email"`
 	GoodName      string    `json:"good_name"`
 	CanBorrow     bool      `json:"can_borrow"`
 	Status        bool      `json:"status"`
