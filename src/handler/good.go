@@ -1,10 +1,10 @@
 package handler
 
 import (
-	"back/model"
-	"net/http"
+    "back/model"
+    "net/http"
 
-	"github.com/labstack/echo"
+    "github.com/labstack/echo"
 )
 
 func AddGoods(c echo.Context) error {
@@ -14,10 +14,10 @@ func AddGoods(c echo.Context) error {
     }
 
     id := c.Param("id")
-	s := model.FindSpace(&model.Space{ID: id})
-	if s.ID == "" {
-		return echo.ErrNotFound
-	}
+    s := model.FindSpace(&model.Space{ID: id})
+    if s.ID == "" {
+        return echo.ErrNotFound
+    }
     goods.SpaceID = s.ID
 
     if goods.GoodName == "" {
@@ -36,41 +36,47 @@ func AddGoods(c echo.Context) error {
 }
 
 func GetGood(c echo.Context) error {
-
     id := c.Param("id")
 
-	space := model.FindSpace(&model.Space{ID: id})
-	if space.ID == "" {
-		return echo.ErrNotFound
-	}
+    space := model.FindSpace(&model.Space{ID: id})
+    if space.ID == "" {
+        return echo.ErrNotFound
+    }
+
+    email := userEmailFromToken(c)
+    user := model.FindUser(&model.User{Email: email})
+    if user.ID == 0 {
+        return echo.ErrNotFound
+    }
+
+    if !IsUserMemberOfSpace(email, id){
+        return echo.ErrNotFound
+    }
 
     good := model.FindGood(&model.Good{SpaceID: space.ID})
 
-	return c.JSON(http.StatusOK, good)
+    return c.JSON(http.StatusOK, good)
 }
 
 func GetGoods(c echo.Context) error {
     id := c.Param("id")
 
-	space := model.FindSpace(&model.Space{ID: id})
-	if space.ID == "" {
-		return echo.ErrNotFound
-	}
+    space := model.FindSpace(&model.Space{ID: id})
+    if space.ID == "" {
+        return echo.ErrNotFound
+    }
 
     email := userEmailFromToken(c)
-	user := model.FindUser(&model.User{Email: email})
-	if user.ID == 0 {
-		return echo.ErrNotFound
-	}
-/*
-	members := model.FindMembers(&model.Member{Email: email})
-	for m := members {
-		if space == model.FindSpace(&model.Space{ID: m.Space}){
+    user := model.FindUser(&model.User{Email: email})
+    if user.ID == 0 {
+        return echo.ErrNotFound
+    }
 
-        }
-	}
-*/
-	goods := model.FindGoods(&model.Good{SpaceID: space.ID})
+    if !IsUserMemberOfSpace(email, id){
+        return echo.ErrNotFound
+    }
+
+    goods := model.FindGoods(&model.Good{SpaceID: space.ID})
 
     return c.JSON(http.StatusOK, goods)
 }
