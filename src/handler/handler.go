@@ -16,3 +16,10 @@ func generateUniqueID() (string, error) {
 		}
 	}
 }
+
+// IsUserMemberOfSpace checks if a user is a member of a specific space.
+func IsUserMemberOfSpace(email string, spaceID string) bool {
+    members := model.FindMembers(&model.Member{Email: email, Space: spaceID})
+    return len(members) > 0
+}
+
