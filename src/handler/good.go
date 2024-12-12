@@ -36,13 +36,22 @@ func AddGoods(c echo.Context) error {
 }
 
 func GetGood(c echo.Context) error {
-
     id := c.Param("id")
 
 	space := model.FindSpace(&model.Space{ID: id})
 	if space.ID == "" {
 		return echo.ErrNotFound
 	}
+
+    email := userEmailFromToken(c)
+	user := model.FindUser(&model.User{Email: email})
+	if user.ID == 0 {
+		return echo.ErrNotFound
+	}
+
+    if !IsUserMemberOfSpace(email, id){
+        return echo.ErrNotFound
+    }
 
     good := model.FindGood(&model.Good{SpaceID: space.ID})
 
@@ -62,14 +71,11 @@ func GetGoods(c echo.Context) error {
 	if user.ID == 0 {
 		return echo.ErrNotFound
 	}
-/*
-	members := model.FindMembers(&model.Member{Email: email})
-	for m := members {
-		if space == model.FindSpace(&model.Space{ID: m.Space}){
 
-        }
-	}
-*/
+    if !IsUserMemberOfSpace(email, id){
+        return echo.ErrNotFound
+    }
+
 	goods := model.FindGoods(&model.Good{SpaceID: space.ID})
 
     return c.JSON(http.StatusOK, goods)
