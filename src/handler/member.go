@@ -4,25 +4,32 @@ import (
 	"back/model"
 	"net/http"
 
+
 	"github.com/labstack/echo"
 )
 
 // GetMembers returns all members of a space.
 func GetMembers(c echo.Context) error {
-	email := userEmailFromToken(c)
-	id := c.Param("id")
-	user := model.FindUser(&model.User{Email: email})
-	if user.ID == 0 {
-		return echo.ErrNotFound
-	}
+    email := userEmailFromToken(c)
+    id := c.Param("id")
 
-	members := model.FindMembers(&model.Member{Space: id})
+    user := model.FindUser(&model.User{Email: email})
+    if user.ID == 0 {
+        return echo.ErrNotFound
+    }
 
-	if len(members) == 0 {
-		return echo.ErrNotFound
-	}
+    if !IsUserMemberOfSpace (email, id) {
+        return echo.ErrNotFound
+    }
 
-	return c.JSON(http.StatusOK, members)
+    
+    members := model.FindMembers(&model.Member{Space: id})
+
+    if len(members) == 0 {
+        return echo.ErrNotFound
+    }
+
+    return c.JSON(http.StatusOK, members)
 }
 
 // AddMembers adds a member to a space.
