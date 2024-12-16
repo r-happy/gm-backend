@@ -36,23 +36,27 @@ func AddGoods(c echo.Context) error {
 }
 
 func GetGood(c echo.Context) error {
-    id := c.Param("id")
+    sid := c.Param("sid")
+    gid := c.Param("gid")
 
-	space := model.FindSpace(&model.Space{ID: id})
+	space := model.FindSpace(&model.Space{ID: sid})
 	if space.ID == "" {
 		return echo.ErrNotFound
 	}
+
+    good := model.FindGood(&model.Good{SpaceID: space.ID, GoodID: gid})
+    if good.GoodID == "" {
+        return echo.ErrNotFound
+    }
 
     email := userEmailFromToken(c)
 	if user := model.FindUser(&model.User{Email: email}); user.ID == 0 {
 		return echo.ErrNotFound
 	}
 
-    if !IsUserMemberOfSpace(email, id) {
+    if !IsUserMemberOfSpace(email, sid) {
         return echo.ErrNotFound
     }
-
-    good := model.FindGood(&model.Good{SpaceID: space.ID})
 
 	return c.JSON(http.StatusOK, good)
 }
