@@ -108,3 +108,29 @@ func GetSpace(c echo.Context) error {
     }
     return c.JSON(http.StatusOK, s)
 }
+
+func GetChildrens(c echo.Context) error {
+	email := userEmailFromToken(c)
+    id := c.Param("id")
+
+    // Find the user based on their email
+    user := model.FindUser(&model.User{Email: email})
+    if user.ID == 0 {
+        return echo.ErrNotFound
+    }
+
+    // Check if the user is a member of the space
+    if !IsUserMemberOfSpace(email, id) {
+        // Do nothing if the user is not a member of the space
+        return echo.ErrNotFound
+    }
+
+	s := model.FindSpace(&model.Space{ID: id})
+    if s.ID == "" {
+        return echo.ErrNotFound
+    }
+
+	spaces := model.FindSpaces(&model.Space{ParentID: s.ID})
+
+	return c.JSON(http.StatusOK, spaces)
+}

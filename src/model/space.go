@@ -36,6 +36,12 @@ func FindSpace(space *Space) Space {
 	return s
 }
 
+func FindSpaces(space *Space) []Space {
+	var s []Space
+	db.Where(space).Find(&s)
+	return s
+}
+
 func FindMembers(member *Member) []Member {
 	var m []Member
 	db.Where(member).Find(&m)
