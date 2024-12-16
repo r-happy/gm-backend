@@ -22,11 +22,37 @@ func AddSpace(c echo.Context) error {
 		}
 	}
 
+	if space.ParentID != "" {
+		// 	parent spaceが有効かどうか確認
+		parent_space := model.FindSpace(&model.Space{ID: space.ParentID})
+		if parent_space.ID == "" {
+			return &echo.HTTPError{
+				Code:	400,
+				Message: "parent space not found",
+			}
+		}
+
+		// parent spaceがすでにparentを持ってないか確認
+		if parent_space.ParentID != "" {
+			return &echo.HTTPError{
+				Code:	400,
+				Message: "parent space already has a parent",
+			}
+		}
+	}
+
 	email := userEmailFromToken(c)
 	if user := model.FindUser(&model.User{Email: email}); user.ID == 0 {
 		return echo.ErrNotFound
 	}
-	
+
+	// parent spaceに所属するか
+	if !IsUserMemberOfSpace(email, space.ParentID) {
+		return &echo.HTTPError{
+			Code:	400,
+			Message: "not a member of parent space",
+		}
+	}
 
 	space.ID, _ = generateUniqueID()
 	space.TimeOfBorn = time.Now()

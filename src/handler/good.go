@@ -44,12 +44,11 @@ func GetGood(c echo.Context) error {
 	}
 
     email := userEmailFromToken(c)
-	user := model.FindUser(&model.User{Email: email})
-	if user.ID == 0 {
+	if user := model.FindUser(&model.User{Email: email}); user.ID == 0 {
 		return echo.ErrNotFound
 	}
 
-    if !IsUserMemberOfSpace(email, id){
+    if !IsUserMemberOfSpace(email, id) {
         return echo.ErrNotFound
     }
 
