@@ -14,10 +14,10 @@ func AddGoods(c echo.Context) error {
     }
 
     id := c.Param("id")
-	s := model.FindSpace(&model.Space{ID: id})
-	if s.ID == "" {
-		return echo.ErrNotFound
-	}
+    s := model.FindSpace(&model.Space{ID: id})
+    if s.ID == "" {
+        return echo.ErrNotFound
+    }
     goods.SpaceID = s.ID
 
     if goods.GoodName == "" {
@@ -64,22 +64,22 @@ func GetGood(c echo.Context) error {
 func GetGoods(c echo.Context) error {
     id := c.Param("id")
 
-	space := model.FindSpace(&model.Space{ID: id})
-	if space.ID == "" {
-		return echo.ErrNotFound
-	}
+    space := model.FindSpace(&model.Space{ID: id})
+    if space.ID == "" {
+        return echo.ErrNotFound
+    }
 
     email := userEmailFromToken(c)
-	user := model.FindUser(&model.User{Email: email})
-	if user.ID == 0 {
-		return echo.ErrNotFound
-	}
+    user := model.FindUser(&model.User{Email: email})
+    if user.ID == 0 {
+        return echo.ErrNotFound
+    }
 
     if !IsUserMemberOfSpace(email, id){
         return echo.ErrNotFound
     }
 
-	goods := model.FindGoods(&model.Good{SpaceID: space.ID})
+    goods := model.FindGoods(&model.Good{SpaceID: space.ID})
 
     return c.JSON(http.StatusOK, goods)
 }
