@@ -4,7 +4,6 @@ import (
 	"back/model"
 	"net/http"
 
-
 	"github.com/labstack/echo"
 )
 
@@ -32,31 +31,37 @@ func GetMembers(c echo.Context) error {
     return c.JSON(http.StatusOK, members)
 }
 
-// AddMembers adds a member to a space.
+type AddMemberRequest struct {
+	Email string `json:"email"`
+	Admin bool   `json:"admin"`
+}
+
 func AddMembers(c echo.Context) error {
 	id := c.Param("id")
-	addemail := c.FormValue("email")
-	adminStr := c.FormValue("admin")
-	admin := adminStr == "true"
 
-	if adminStr == "" {
+	// JSONリクエストをバインド
+	var req AddMemberRequest
+	if err := c.Bind(&req); err != nil {
 		return &echo.HTTPError{
-			Code:    400,
-			Message: "invalid admin",
+			Code:    http.StatusBadRequest,
+			Message: "invalid request body",
 		}
 	}
-
-	if addemail == "" {
+	
+	// リクエストのバリデーション
+	if req.Email == "" {
 		return &echo.HTTPError{
 			Code:    400,
 			Message: "invalid email",
 		}
 	}
 
-	if addmember := model.FindUser(&model.User{Email: addemail}); addmember.ID == 0 {
+	// ユーザー存在確認
+	if addmember := model.FindUser(&model.User{Email: req.Email}); addmember.ID == 0 {
 		return echo.ErrNotFound
 	}
 
+	// スペース存在確認
 	if space := model.FindSpace(&model.Space{ID: id}); space.ID == "" {
 		return echo.ErrNotFound
 	}
@@ -67,10 +72,11 @@ func AddMembers(c echo.Context) error {
 		return echo.ErrNotFound
 	}
 
+	// メンバー作成
 	member := &model.Member{
 		Space: id,
-		Email: addemail,
-		Admin: admin,
+		Email: req.Email,
+		Admin: req.Admin,
 	}
 
 	model.CreateMember(member)
