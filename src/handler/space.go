@@ -22,11 +22,37 @@ func AddSpace(c echo.Context) error {
 		}
 	}
 
+	if space.ParentID != "" {
+		// 	parent spaceが有効かどうか確認
+		parent_space := model.FindSpace(&model.Space{ID: space.ParentID})
+		if parent_space.ID == "" {
+			return &echo.HTTPError{
+				Code:	400,
+				Message: "parent space not found",
+			}
+		}
+
+		// parent spaceがすでにparentを持ってないか確認
+		if parent_space.ParentID != "" {
+			return &echo.HTTPError{
+				Code:	400,
+				Message: "parent space already has a parent",
+			}
+		}
+	}
+
 	email := userEmailFromToken(c)
 	if user := model.FindUser(&model.User{Email: email}); user.ID == 0 {
 		return echo.ErrNotFound
 	}
-	
+
+	// parent spaceに所属するか
+	if !IsUserMemberOfSpace(email, space.ParentID) {
+		return &echo.HTTPError{
+			Code:	400,
+			Message: "not a member of parent space",
+		}
+	}
 
 	space.ID, _ = generateUniqueID()
 	space.TimeOfBorn = time.Now()
@@ -81,4 +107,30 @@ func GetSpace(c echo.Context) error {
         return echo.ErrNotFound
     }
     return c.JSON(http.StatusOK, s)
+}
+
+func GetChildrens(c echo.Context) error {
+	email := userEmailFromToken(c)
+    id := c.Param("id")
+
+    // Find the user based on their email
+    user := model.FindUser(&model.User{Email: email})
+    if user.ID == 0 {
+        return echo.ErrNotFound
+    }
+
+    // Check if the user is a member of the space
+    if !IsUserMemberOfSpace(email, id) {
+        // Do nothing if the user is not a member of the space
+        return echo.ErrNotFound
+    }
+
+	s := model.FindSpace(&model.Space{ID: id})
+    if s.ID == "" {
+        return echo.ErrNotFound
+    }
+
+	spaces := model.FindSpaces(&model.Space{ParentID: s.ID})
+
+	return c.JSON(http.StatusOK, spaces)
 }

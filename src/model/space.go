@@ -6,6 +6,7 @@ import (
 
 type Space struct {
 	ID string `json:"id"` // プライマリキー
+	ParentID string `json:"parent_id"`	// 親ID
 	SpaceName string `json:"space_name"` // スペース名
 	TimeOfBorn time.Time `json:"time_of_born"` // 作成日時、自動生成
 }
@@ -32,6 +33,12 @@ func CreateMember(member *Member) {
 func FindSpace(space *Space) Space {
 	var s Space
 	db.Where(space).First(&s)
+	return s
+}
+
+func FindSpaces(space *Space) []Space {
+	var s []Space
+	db.Where(space).Find(&s)
 	return s
 }
 

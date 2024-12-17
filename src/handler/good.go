@@ -1,10 +1,10 @@
 package handler
 
 import (
-    "back/model"
-    "net/http"
+	"back/model"
+	"net/http"
 
-    "github.com/labstack/echo"
+	"github.com/labstack/echo"
 )
 
 func AddGoods(c echo.Context) error {
@@ -36,26 +36,29 @@ func AddGoods(c echo.Context) error {
 }
 
 func GetGood(c echo.Context) error {
-    id := c.Param("id")
+    sid := c.Param("sid")
+    gid := c.Param("gid")
 
-    space := model.FindSpace(&model.Space{ID: id})
-    if space.ID == "" {
+	space := model.FindSpace(&model.Space{ID: sid})
+	if space.ID == "" {
+		return echo.ErrNotFound
+	}
+
+    good := model.FindGood(&model.Good{SpaceID: space.ID, GoodID: gid})
+    if good.GoodID == "" {
         return echo.ErrNotFound
     }
 
     email := userEmailFromToken(c)
-    user := model.FindUser(&model.User{Email: email})
-    if user.ID == 0 {
+	if user := model.FindUser(&model.User{Email: email}); user.ID == 0 {
+		return echo.ErrNotFound
+	}
+
+    if !IsUserMemberOfSpace(email, sid) {
         return echo.ErrNotFound
     }
 
-    if !IsUserMemberOfSpace(email, id){
-        return echo.ErrNotFound
-    }
-
-    good := model.FindGood(&model.Good{SpaceID: space.ID})
-
-    return c.JSON(http.StatusOK, good)
+	return c.JSON(http.StatusOK, good)
 }
 
 func GetGoods(c echo.Context) error {

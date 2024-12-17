@@ -26,6 +26,7 @@ func newRouter() *echo.Echo {
 	api.GET("/space/:id/member", handler.GetMembers)
 	api.POST("/space/:id/member", handler.AddMembers)
 	api.GET("/spaces", handler.GetSpaces)
+	api.GET("/space/:id/children", handler.GetChildrens)
 	api.GET("/space/:id/good", handler.GetGoods)
 	api.GET("/space/:sid/good/:gid", handler.GetGood)
 	api.POST("/space/:id/good", handler.AddGoods)
