@@ -22,6 +22,8 @@ func AddSpace(c echo.Context) error {
 		}
 	}
 
+	email := userEmailFromToken(c)
+
 	if space.ParentID != "" {
 		// 	parent spaceが有効かどうか確認
 		parent_space := model.FindSpace(&model.Space{ID: space.ParentID})
@@ -48,7 +50,6 @@ func AddSpace(c echo.Context) error {
 		}
 	}
 
-	email := userEmailFromToken(c)
 	if user := model.FindUser(&model.User{Email: email}); user.ID == 0 {
 		return echo.ErrNotFound
 	}
