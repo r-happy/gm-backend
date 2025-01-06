@@ -39,19 +39,18 @@ func AddSpace(c echo.Context) error {
 				Message: "parent space already has a parent",
 			}
 		}
+			// parent spaceに所属するか
+		if !IsUserMemberOfSpace(email, space.ParentID) {
+			return &echo.HTTPError{
+				Code:	400,
+				Message: "not a member of parent space",
+			}
+		}
 	}
 
 	email := userEmailFromToken(c)
 	if user := model.FindUser(&model.User{Email: email}); user.ID == 0 {
 		return echo.ErrNotFound
-	}
-
-	// parent spaceに所属するか
-	if !IsUserMemberOfSpace(email, space.ParentID) {
-		return &echo.HTTPError{
-			Code:	400,
-			Message: "not a member of parent space",
-		}
 	}
 
 	space.ID, _ = generateUniqueID()
