@@ -9,30 +9,30 @@ import (
 
 // GetMembers returns all members of a space.
 func GetMembers(c echo.Context) error {
-    email := userEmailFromToken(c)
-    id := c.Param("id")
+	email := userEmailFromToken(c)
+	id := c.Param("id")
 
-    user := model.FindUser(&model.User{Email: email})
-    if user.ID == 0 {
-        return echo.ErrNotFound
-    }
+	user := model.FindUser(&model.User{Email: email})
+	if user.ID == 0 {
+		return echo.ErrNotFound
+	}
 
-    if !IsUserMemberOfSpace (email, id) {
-        return echo.ErrNotFound
-    }
+	if !IsUserMemberOfSpace(email, id) {
+		return echo.ErrNotFound
+	}
 
-    
-    members := model.FindMembers(&model.Member{Space: id})
+	members := model.FindMembers(&model.Member{Space: id})
 
-    if len(members) == 0 {
-        return echo.ErrNotFound
-    }
+	if len(members) == 0 {
+		return echo.ErrNotFound
+	}
 
-    return c.JSON(http.StatusOK, members)
+	return c.JSON(http.StatusOK, members)
 }
 
 type AddMemberRequest struct {
 	Email string `json:"email"`
+	Name  string `json:"name"`
 	Admin bool   `json:"admin"`
 }
 
@@ -47,7 +47,7 @@ func AddMembers(c echo.Context) error {
 			Message: "invalid request body",
 		}
 	}
-	
+
 	// リクエストのバリデーション
 	if req.Email == "" {
 		return &echo.HTTPError{
@@ -76,6 +76,7 @@ func AddMembers(c echo.Context) error {
 	member := &model.Member{
 		Space: id,
 		Email: req.Email,
+		Name: user.Name,
 		Admin: req.Admin,
 	}
 

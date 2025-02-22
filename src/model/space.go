@@ -14,6 +14,7 @@ type Space struct {
 type Member struct {
 	Space string `json:"space_id"`
 	Email string `json:"email"`
+	Name string `json:"name"`
 	Admin bool   `json:"admin"`
 }
 
