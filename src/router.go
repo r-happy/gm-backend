@@ -88,7 +88,7 @@ func newRouter() *echo.Echo {
 		Parameters:
 			sid: string
 			gid: string
-		Body: { "email": "string" }
+		Body: { "email": "string", "viewed_status": "string (true or false)" }
 	*/
 	api.POST("/space/:sid/good/:gid", handler.ToggleGood)
 

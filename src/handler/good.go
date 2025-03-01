@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"net/http"
 	"time"
+	"strconv"
 
 	"github.com/labstack/echo"
 )
@@ -92,6 +93,8 @@ func ToggleGood(c echo.Context) error {
 	gid := c.Param("gid")
 
     email := c.FormValue("email")
+    viewedStatusStr := c.FormValue("viewed_status")
+    viewedStatusBool, _ := strconv.ParseBool(viewedStatusStr)
 
 	if email == "" {
 		return &echo.HTTPError{
@@ -105,6 +108,10 @@ func ToggleGood(c echo.Context) error {
 	}
 
 	good := model.FindGood(&model.Good{GoodID: gid, SpaceID: sid})
+	
+    if (viewedStatusBool != good.Status) {
+        return echo.ErrForbidden
+    }
 
 	if good.GoodID == "" {
 		return echo.ErrNotFound
