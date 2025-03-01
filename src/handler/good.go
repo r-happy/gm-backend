@@ -92,6 +92,7 @@ func ToggleGood(c echo.Context) error {
 	gid := c.Param("gid")
 
 	email := c.FormValue("email")
+    myemail := userEmailFromToken(c)
 	viewedStatusStr := c.FormValue("viewed_status")
 	viewedStatusBool, _ := strconv.ParseBool(viewedStatusStr)
 
@@ -115,6 +116,14 @@ func ToggleGood(c echo.Context) error {
 	if !good.CanBorrow {
 		return echo.ErrForbidden
 	}
+
+    mymemberinfo := model.FindMembers(&model.Member{Email: myemail, Space: sid})
+    if len(mymemberinfo) == 0 {
+        return echo.ErrNotFound
+    }
+    if !mymemberinfo[0].Admin {
+        return echo.ErrForbidden
+    }
 
 	if !good.Status {
 		// memberとして有効か, 管理者か確認
