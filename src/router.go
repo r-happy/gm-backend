@@ -50,6 +50,15 @@ func newRouter() *echo.Echo {
 	api.POST("/space/:id/member", handler.AddMembers)
 
 	/*
+		/space/:id/admin
+		管理者権限の切り替え
+		Parameters:
+			id: string
+		Body: { "emial": "string" }
+	*/
+	api.POST("/space/:id/admin", handler.ToggleMemberAdmin)
+
+	/*
 		/spaces
 		全てのスペースを取得
 		Parameters:

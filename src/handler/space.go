@@ -50,7 +50,9 @@ func AddSpace(c echo.Context) error {
 		}
 	}
 
-	if user := model.FindUser(&model.User{Email: email}); user.ID == 0 {
+	user := model.FindUser(&model.User{Email: email})
+
+	if user.ID == 0 {
 		return echo.ErrNotFound
 	}
 
@@ -61,6 +63,7 @@ func AddSpace(c echo.Context) error {
 	member := &model.Member{
 		Space: space.ID,
 		Email: email,
+		Name: user.Name,
 		Admin: true,
 	}
 	model.CreateMember(member)

@@ -2,10 +2,9 @@ package handler
 
 import (
 	"back/model"
-	"fmt"
 	"net/http"
-	"time"
 	"strconv"
+	"time"
 
 	"github.com/labstack/echo"
 )
@@ -92,9 +91,9 @@ func ToggleGood(c echo.Context) error {
 	sid := c.Param("sid")
 	gid := c.Param("gid")
 
-    email := c.FormValue("email")
-    viewedStatusStr := c.FormValue("viewed_status")
-    viewedStatusBool, _ := strconv.ParseBool(viewedStatusStr)
+	email := c.FormValue("email")
+	viewedStatusStr := c.FormValue("viewed_status")
+	viewedStatusBool, _ := strconv.ParseBool(viewedStatusStr)
 
 	if email == "" {
 		return &echo.HTTPError{
@@ -103,15 +102,11 @@ func ToggleGood(c echo.Context) error {
 		}
 	}
 
-	if user := model.FindUser(&model.User{Email: email}); user.ID == 0 {
-		return echo.ErrNotFound
-	}
-
 	good := model.FindGood(&model.Good{GoodID: gid, SpaceID: sid})
-	
-    if (viewedStatusBool != good.Status) {
-        return echo.ErrForbidden
-    }
+
+	if viewedStatusBool != good.Status {
+		return echo.ErrForbidden
+	}
 
 	if good.GoodID == "" {
 		return echo.ErrNotFound
@@ -120,23 +115,23 @@ func ToggleGood(c echo.Context) error {
 	if !good.CanBorrow {
 		return echo.ErrForbidden
 	}
-	fmt.Println(good.Status)
 
-	// 状態を切り替える
-	if good.Status {
-		good.Status = false
+	if !good.Status {
+		// memberとして有効か, 管理者か確認
+		member := model.FindMembers(&model.Member{Email: email, Space: sid})
+		if len(member) == 0 {
+			return echo.ErrNotFound
+		}
+		if !member[0].Admin {
+			return echo.ErrForbidden
+		}
+
+		good.Status = true
 		good.WhoBorrowUid = email
-
-		userData := model.FindUser(&model.User{Email: email})
-
-		good.WhoBorrowName = userData.Name
+		good.WhoBorrowName = member[0].Name
 		good.WhenBorrow = time.Now()
 	} else {
-		good.Status = true
-		good.WhoReturnUid = email
-
-		userData := model.FindUser(&model.User{Email: email})
-		good.WhoReturnName = userData.Name
+		good.Status = false
 	}
 
 	model.SaveGood(&good)
