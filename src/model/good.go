@@ -32,3 +32,15 @@ func FindGoods(good *Good) []Good {
 	db.Where(good).Find(&g)
 	return g
 }
+
+func SaveGood(good *Good) error {
+    return db.Model(&Good{}).Where("good_id = ? AND space_id = ?", good.GoodID, good.SpaceID).
+        Updates(map[string]interface{}{
+            "status":           good.Status,
+            "who_borrow_uid":   good.WhoBorrowUid,
+            "who_borrow_name":  good.WhoBorrowName,
+            "when_borrow":      good.WhenBorrow,
+            "who_return_uid":   good.WhoReturnUid,
+            "who_return_name":  good.WhoReturnName,
+        }).Error
+}
