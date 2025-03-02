@@ -18,11 +18,6 @@ type Member struct {
 	Admin bool   `json:"admin"`
 }
 
-type ResponsibleUid struct {
-	Space          string `json:"space_name"`
-	ResponsibleUid string `json:"responsible_uid"`
-}
-
 func CreateSpace(space *Space) {
 	db.Create(space)
 }

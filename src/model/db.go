@@ -15,7 +15,7 @@ func init() {
 	}
 
 	// AutoMigrate database models
-	err = db.AutoMigrate(&User{}, &Space{}, &Member{}, &Good{}, &ResponsibleUid{})
+	err = db.AutoMigrate(&User{}, &Space{}, &Member{}, &Good{}, &BorrowUser{})
 	if err != nil {
 		panic("failed to migrate database")
 	}

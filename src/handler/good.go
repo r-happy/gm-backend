@@ -2,17 +2,27 @@ package handler
 
 import (
 	"back/model"
+	"fmt"
 	"net/http"
 	"strconv"
+	"strings"
 	"time"
 
 	"github.com/labstack/echo"
 )
 
 func AddGoods(c echo.Context) error {
-	goods := new(model.Good)
-	if err := c.Bind(goods); err != nil {
+	good := new(model.Good)
+	if err := c.Bind(good); err != nil {
 		return err
+	}
+
+	borrowUserEmailsString := c.FormValue("borrowUserEmails")
+	if borrowUserEmailsString == "" {
+		return &echo.HTTPError{
+			Code:    400,
+			Message: "invalid borrow user emails",
+		}
 	}
 
 	id := c.Param("id")
@@ -20,22 +30,38 @@ func AddGoods(c echo.Context) error {
 	if s.ID == "" {
 		return echo.ErrNotFound
 	}
-	goods.SpaceID = s.ID
+	good.SpaceID = s.ID
 
-	if goods.GoodName == "" {
+	if good.GoodName == "" {
 		return &echo.HTTPError{
 			Code:    400,
 			Message: "invalid goods name",
 		}
 	}
 
-	goods.GoodID, _ = generateUniqueID()
-	goods.AddEmail = userEmailFromToken(c)
-	goods.CanBorrow = true
+	good.GoodID, _ = generateUniqueID()
+	good.AddEmail = userEmailFromToken(c)
+	good.CanBorrow = true
 
-	model.CreateGood(goods)
+	model.CreateGood(good)
 
-	return c.JSON(http.StatusCreated, goods)
+	borrowUserEmails := strings.Split(borrowUserEmailsString, ",")	
+	for i := range borrowUserEmails {
+		var borrowUser model.BorrowUser
+		tmp := strings.TrimSpace(borrowUserEmails[i])
+		isMember := model.FindMembers(&model.Member{Email: tmp, Space: good.SpaceID})
+
+		if len(isMember) == 0 {
+			return echo.ErrNotFound
+		}
+
+		borrowUser.Email = tmp
+		borrowUser.GoodID = good.GoodID
+		borrowUser.Name = isMember[0].Name
+		model.CreateBorrowUser(&borrowUser)
+	}
+
+	return c.JSON(http.StatusCreated, good)
 }
 
 func GetGood(c echo.Context) error {
@@ -126,18 +152,15 @@ func ToggleGood(c echo.Context) error {
     }
 
 	if !good.Status {
-		// memberとして有効か, 管理者か確認
-		member := model.FindMembers(&model.Member{Email: email, Space: sid})
-		if len(member) == 0 {
+		member := model.FindBorrowUser(&model.BorrowUser{GoodID: gid, Email: email}) 
+		fmt.Println(member)
+		if member.Email == "" {
 			return echo.ErrNotFound
-		}
-		if !member[0].Admin {
-			return echo.ErrForbidden
 		}
 
 		good.Status = true
 		good.WhoBorrowUid = email
-		good.WhoBorrowName = member[0].Name
+		good.WhoBorrowName = member.Name
 		good.WhenBorrow = time.Now()
 	} else {
 		good.Status = false
@@ -146,4 +169,27 @@ func ToggleGood(c echo.Context) error {
 	model.SaveGood(&good)
 
 	return c.JSON(http.StatusOK, good)
+}
+
+func GetBorrowUser(c echo.Context) error {
+	sid := c.Param("id")
+	gid := c.Param("gid")
+
+	email := userEmailFromToken(c)
+	if user := model.FindUser(&model.User{Email: email}); user.ID == 0 {
+		return echo.ErrNotFound
+	}
+
+	if !IsUserMemberOfSpace(email, sid) {
+		return echo.ErrNotFound
+	}
+
+	good := model.FindGood(&model.Good{GoodID: gid, SpaceID: sid})
+	if good.GoodID == "" {
+		return echo.ErrNotFound
+	}
+
+	borrowUser := model.FindBorrowUsers(&model.BorrowUser{GoodID: gid})
+
+	return c.JSON(http.StatusOK, borrowUser)
 }

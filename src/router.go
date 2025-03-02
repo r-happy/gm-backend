@@ -81,6 +81,15 @@ func newRouter() *echo.Echo {
 			id: string
 	*/
 	api.GET("/space/:id/good", handler.GetGoods)
+	
+	/*
+		/space/:id/good/:gid/borrow
+		グッズの借りれる人を返す
+		Parameters:
+			id: string
+			gid: string
+	*/
+	api.GET("/space/:id/good/:gid/borrow", handler.GetBorrowUser)
 
 	/*
 		/space/:sid/good/:gid
@@ -106,7 +115,7 @@ func newRouter() *echo.Echo {
 		スペースにグッズを追加
 		Parameters:
 			id: string
-		Body: { "good_name": "string", "description": "string" }
+		Body: { "good_name": "string", "description": "string", "borrow_user_emails": "string" }
 	*/
 	api.POST("/space/:id/good", handler.AddGoods)
 
