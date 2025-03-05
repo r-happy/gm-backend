@@ -163,6 +163,15 @@ func ToggleGood(c echo.Context) error {
 		good.WhoBorrowName = member.Name
 		good.WhenBorrow = time.Now()
 	} else {
+		hisory := model.History{
+			SpaceID: sid,
+			GoodID: gid,
+			GoodName: good.GoodName,
+			BorrowUser: good.WhoBorrowName,
+			WhenBorrow: good.WhenBorrow,
+			WhenReturn: time.Now(),
+		}
+		model.CreateHistory(&hisory)
 		good.Status = false
 	}
 

@@ -81,7 +81,7 @@ func newRouter() *echo.Echo {
 			id: string
 	*/
 	api.GET("/space/:id/good", handler.GetGoods)
-	
+
 	/*
 		/space/:id/good/:gid/borrow
 		グッズの借りれる人を返す
@@ -100,6 +100,14 @@ func newRouter() *echo.Echo {
 	*/
 	api.GET("/space/:sid/good/:gid", handler.GetGood)
 
+	/*
+		/space/:sid/good/:gid
+		グッズの情報を更新
+		Parameters:
+			sid: string
+			gid: string
+		Body: { "good_name": "string", "description": "string", "borrow_user_emails": "string" }
+	*/
 	api.PUT("/space/:sid/good/:gid", handler.UpdateGood)
 
 	/*
@@ -120,6 +128,14 @@ func newRouter() *echo.Echo {
 		Body: { "good_name": "string", "description": "string", "borrow_user_emails": "string" }
 	*/
 	api.POST("/space/:id/good", handler.AddGoods)
+
+	/*
+		/space/:sid/history
+		スペースの履歴を取得
+		Parameters:
+			sid: string
+	*/
+	api.GET("/space/:sid/history", handler.GetHistories)
 
 	/*
 		/profile
