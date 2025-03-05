@@ -100,6 +100,8 @@ func newRouter() *echo.Echo {
 	*/
 	api.GET("/space/:sid/good/:gid", handler.GetGood)
 
+	api.PUT("/space/:sid/good/:gid", handler.UpdateGood)
+
 	/*
 		/space/:sid/good/:gid
 		グッズの状態をトグル

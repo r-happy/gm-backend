@@ -193,3 +193,29 @@ func GetBorrowUser(c echo.Context) error {
 
 	return c.JSON(http.StatusOK, borrowUser)
 }
+
+func UpdateGood(c echo.Context) error {
+	sid := c.Param("sid")
+	gid := c.Param("gid")
+
+	good := new(model.Good)
+	if err := c.Bind(good); err != nil {
+		return err
+	}
+
+	email := userEmailFromToken(c)
+	if user := model.FindUser(&model.User{Email: email}); user.ID == 0 {
+		return echo.ErrNotFound
+	}
+
+	if !IsUserMemberOfSpace(email, sid) {
+		return echo.ErrNotFound
+	}
+
+	good.SpaceID = sid
+	good.GoodID = gid
+
+	model.SaveGood(good)
+
+	return c.JSON(http.StatusOK, good)
+}
