@@ -22,6 +22,6 @@ func FindBorrowUsers(borrowUser *BorrowUser) []BorrowUser {
 	return b
 }
 
-func RemoveBorrowUser(borrowUser *BorrowUser) {
-	db.Delete(borrowUser)
+func RemoveBorrowUser(good_id string) {
+	db.Where("good_id = ?", good_id).Delete(&BorrowUser{})
 }

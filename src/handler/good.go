@@ -45,7 +45,7 @@ func AddGoods(c echo.Context) error {
 
 	model.CreateGood(good)
 
-	borrowUserEmails := strings.Split(borrowUserEmailsString, ",")	
+	borrowUserEmails := strings.Split(borrowUserEmailsString, ",")
 	for i := range borrowUserEmails {
 		var borrowUser model.BorrowUser
 		tmp := strings.TrimSpace(borrowUserEmails[i])
@@ -118,7 +118,7 @@ func ToggleGood(c echo.Context) error {
 	gid := c.Param("gid")
 
 	email := c.FormValue("email")
-    myemail := userEmailFromToken(c)
+	myemail := userEmailFromToken(c)
 	viewedStatusStr := c.FormValue("viewed_status")
 	viewedStatusBool, _ := strconv.ParseBool(viewedStatusStr)
 
@@ -143,16 +143,16 @@ func ToggleGood(c echo.Context) error {
 		return echo.ErrForbidden
 	}
 
-    mymemberinfo := model.FindMembers(&model.Member{Email: myemail, Space: sid})
-    if len(mymemberinfo) == 0 {
-        return echo.ErrNotFound
-    }
-    if !mymemberinfo[0].Admin {
-        return echo.ErrForbidden
-    }
+	mymemberinfo := model.FindMembers(&model.Member{Email: myemail, Space: sid})
+	if len(mymemberinfo) == 0 {
+		return echo.ErrNotFound
+	}
+	if !mymemberinfo[0].Admin {
+		return echo.ErrForbidden
+	}
 
 	if !good.Status {
-		member := model.FindBorrowUser(&model.BorrowUser{GoodID: gid, Email: email}) 
+		member := model.FindBorrowUser(&model.BorrowUser{GoodID: gid, Email: email})
 		fmt.Println(member)
 		if member.Email == "" {
 			return echo.ErrNotFound
@@ -164,9 +164,9 @@ func ToggleGood(c echo.Context) error {
 		good.WhenBorrow = time.Now()
 	} else {
 		hisory := model.History{
-			SpaceID: sid,
-			GoodID: gid,
-			GoodName: good.GoodName,
+			SpaceID:    sid,
+			GoodID:     gid,
+			GoodName:   good.GoodName,
 			BorrowUser: good.WhoBorrowName,
 			WhenBorrow: good.WhenBorrow,
 			WhenReturn: time.Now(),
@@ -207,24 +207,51 @@ func UpdateGood(c echo.Context) error {
 	sid := c.Param("sid")
 	gid := c.Param("gid")
 
-	good := new(model.Good)
-	if err := c.Bind(good); err != nil {
-		return err
+	borrowUserEmailsString := c.FormValue("borrowUserEmails")
+	if borrowUserEmailsString == "" {
+		return &echo.HTTPError{
+			Code:    400,
+			Message: "invalid borrow user emails",
+		}
 	}
+
+	good := model.FindGood(&model.Good{GoodID: gid, SpaceID: sid})
 
 	email := userEmailFromToken(c)
-	if user := model.FindUser(&model.User{Email: email}); user.ID == 0 {
+
+	user := model.FindMembers(&model.Member{Email: email, Space: sid})
+	if len(user) == 0 {
 		return echo.ErrNotFound
 	}
 
-	if !IsUserMemberOfSpace(email, sid) {
-		return echo.ErrNotFound
+	if !user[0].Admin {
+		return echo.ErrForbidden
+	}
+
+	borrowUserEmails := strings.Split(borrowUserEmailsString, ",")
+	model.RemoveBorrowUser(gid)
+
+	for i := range borrowUserEmails {
+		var borrowUser model.BorrowUser
+		tmp := strings.TrimSpace(borrowUserEmails[i])
+		isMember := model.FindMembers(&model.Member{Email: tmp, Space: good.SpaceID})
+
+		if len(isMember) == 0 {
+			return echo.ErrNotFound
+		}
+
+		borrowUser.Email = tmp
+		borrowUser.GoodID = good.GoodID
+		borrowUser.Name = isMember[0].Name
+		model.CreateBorrowUser(&borrowUser)
 	}
 
 	good.SpaceID = sid
 	good.GoodID = gid
+	good.GoodName = c.FormValue("goodName")
+	good.Description = c.FormValue("description")
 
-	model.SaveGood(good)
+	model.SaveGood(&good)
 
 	return c.JSON(http.StatusOK, good)
 }
